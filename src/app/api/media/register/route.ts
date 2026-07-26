@@ -15,7 +15,8 @@ type Body = {
   filename?: string;
   mimeType?: string;
   size?: number;
-  caption?: string;
+  kind?: "photo" | "video" | "certificate";
+  printGroup?: "trompe" | "gateaux" | "exclude" | "highlight" | "evenementiels";
 };
 
 export async function POST(request: Request) {
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Métadonnées incomplètes." }, { status: 400 });
   }
 
-  const kind = kindFromMime(body.mimeType);
+  const kind = kindFromMime(body.mimeType, body.kind);
   if (!kind) {
     return NextResponse.json({ error: "Format non supporté." }, { status: 400 });
   }
@@ -46,7 +47,8 @@ export async function POST(request: Request) {
       filename: body.filename,
       mimeType: body.mimeType,
       size,
-      caption: body.caption,
+      kind: body.kind,
+      printGroup: body.printGroup,
     });
     return NextResponse.json({ item });
   } catch (error) {

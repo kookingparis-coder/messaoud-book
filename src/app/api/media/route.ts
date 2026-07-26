@@ -33,12 +33,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Aucun fichier reçu." }, { status: 400 });
   }
 
-  const caption = form.get("caption");
+  const kindRaw = form.get("kind");
+  const kind =
+    kindRaw === "photo" || kindRaw === "video" || kindRaw === "certificate"
+      ? kindRaw
+      : undefined;
+
+  const printGroupRaw = form.get("printGroup");
+  const printGroup =
+    printGroupRaw === "trompe" ||
+    printGroupRaw === "gateaux" ||
+    printGroupRaw === "exclude" ||
+    printGroupRaw === "highlight" ||
+    printGroupRaw === "evenementiels"
+      ? printGroupRaw
+      : undefined;
+
   try {
-    const item = await saveLocalUpload({
-      file,
-      caption: typeof caption === "string" ? caption : undefined,
-    });
+    const item = await saveLocalUpload({ file, kind, printGroup });
     return NextResponse.json({ item });
   } catch (error) {
     const message =

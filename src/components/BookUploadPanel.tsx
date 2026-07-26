@@ -2,15 +2,22 @@
 
 import { upload } from "@vercel/blob/client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { MediaItem } from "@/lib/media-types";
+import type { MediaItem, MediaKind } from "@/lib/media-types";
 
 const PIN_KEY = "book-admin-pin";
+
+const KIND_LABELS: Record<MediaKind, string> = {
+  photo: "Photos",
+  video: "Vidéos",
+  certificate: "Certificats",
+};
 
 type Props = {
   items: MediaItem[];
   blobEnabled: boolean;
   pinRequired: boolean;
   onChange: (items: MediaItem[]) => void;
+  defaultKind?: MediaKind;
 };
 
 export default function BookUploadPanel({
@@ -18,16 +25,22 @@ export default function BookUploadPanel({
   blobEnabled,
   pinRequired,
   onChange,
+  defaultKind = "photo",
 }: Props) {
   const [open, setOpen] = useState(false);
   const [pin, setPin] = useState("");
   const [unlocked, setUnlocked] = useState(!pinRequired);
-  const [caption, setCaption] = useState("");
+  const [kind, setKind] = useState<MediaKind>(defaultKind);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [asHighlight, setAsHighlight] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setKind(defaultKind);
+  }, [defaultKind]);
 
   useEffect(() => {
     const saved = sessionStorage.getItem(PIN_KEY);
@@ -49,6 +62,11 @@ export default function BookUploadPanel({
     setError(null);
   };
 
+  const accept =
+    kind === "video"
+      ? "video/mp4,video/webm,video/quicktime"
+      : "image/jpeg,image/png,image/webp,image/gif";
+
   const uploadFiles = useCallback(
     async (files: FileList | File[]) => {
       const list = Array.from(files);
@@ -60,18 +78,18 @@ export default function BookUploadPanel({
       try {
         const nextItems = [...items];
 
+        const printGroup =
+          kind === "photo" && asHighlight ? "highlight" : undefined;
+
         for (let i = 0; i < list.length; i++) {
           const file = list[i];
-          setProgress(`Upload ${i + 1}/${list.length} — ${file.name}`);
+          setProgress(`Upload ${i + 1}/${list.length}`);
 
           if (blobEnabled) {
             const blob = await upload(file.name, file, {
               access: "public",
               handleUploadUrl: "/api/upload",
-              clientPayload: JSON.stringify({
-                pin,
-                caption: caption.trim() || undefined,
-              }),
+              clientPayload: JSON.stringify({ pin, kind }),
             });
 
             const res = await fetch("/api/media/register", {
@@ -84,7 +102,8 @@ export default function BookUploadPanel({
                 filename: file.name,
                 mimeType: file.type || blob.contentType,
                 size: file.size,
-                caption: caption.trim() || undefined,
+                kind,
+                printGroup,
               }),
             });
             const data = await res.json();
@@ -94,7 +113,8 @@ export default function BookUploadPanel({
             const form = new FormData();
             form.append("file", file);
             form.append("pin", pin);
-            if (caption.trim()) form.append("caption", caption.trim());
+            form.append("kind", kind);
+            if (printGroup) form.append("printGroup", printGroup);
 
             const res = await fetch("/api/media", {
               method: "POST",
@@ -108,7 +128,6 @@ export default function BookUploadPanel({
         }
 
         onChange(nextItems);
-        setCaption("");
         setProgress(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Échec de l’upload.");
@@ -118,7 +137,7 @@ export default function BookUploadPanel({
         if (inputRef.current) inputRef.current.value = "";
       }
     },
-    [blobEnabled, caption, items, onChange, pin]
+    [asHighlight, blobEnabled, items, kind, onChange, pin]
   );
 
   const removeItem = async (id: string) => {
@@ -139,6 +158,33 @@ export default function BookUploadPanel({
     }
   };
 
+  const toggleHighlight = async (item: MediaItem) => {
+    const nextGroup = item.printGroup === "highlight" ? "gateaux" : "highlight";
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/media/${item.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-book-admin-pin": pin,
+        },
+        body: JSON.stringify({ pin, printGroup: nextGroup }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Mise à jour impossible.");
+      onChange(
+        items.map((entry) => (entry.id === item.id ? data.item : entry))
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Mise à jour impossible.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const managed = items.filter((item) => item.kind === kind);
+
   return (
     <>
       <button
@@ -146,7 +192,7 @@ export default function BookUploadPanel({
         onClick={() => setOpen(true)}
         className="book-no-print fixed bottom-6 right-5 z-40 border border-[var(--book-gold)] bg-black/90 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--book-gold)] shadow-[0_0_40px_rgb(212_175_55_/_0.2)] backdrop-blur-md transition hover:bg-[var(--book-gold)]/10 sm:right-8"
       >
-        + Ajouter photos / vidéos
+        + Ajouter des médias
       </button>
 
       {open && (
@@ -167,7 +213,7 @@ export default function BookUploadPanel({
                   Gestion du book
                 </p>
                 <h3 className="mt-2 font-display text-2xl text-[var(--book-cream)]">
-                  Photos & vidéos
+                  Médias
                 </h3>
               </div>
               <button
@@ -203,13 +249,22 @@ export default function BookUploadPanel({
               </div>
             ) : (
               <div className="space-y-5">
-                <input
-                  type="text"
-                  value={caption}
-                  onChange={(e) => setCaption(e.target.value)}
-                  placeholder="Légende (optionnel)"
-                  className="w-full border border-[var(--book-gold)]/35 bg-black px-4 py-3 text-sm text-[var(--book-cream)] outline-none focus:border-[var(--book-gold)]"
-                />
+                <div className="grid grid-cols-3 gap-2">
+                  {(Object.keys(KIND_LABELS) as MediaKind[]).map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setKind(key)}
+                      className={`border px-2 py-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] transition ${
+                        kind === key
+                          ? "border-[var(--book-gold)] bg-[var(--book-gold)]/15 text-[var(--book-gold)]"
+                          : "border-[var(--book-gold)]/25 text-[var(--book-cream)]/60 hover:border-[var(--book-gold)]/50"
+                      }`}
+                    >
+                      {KIND_LABELS[key]}
+                    </button>
+                  ))}
+                </div>
 
                 <div
                   onDragOver={(e) => {
@@ -231,11 +286,24 @@ export default function BookUploadPanel({
                   }`}
                 >
                   <p className="font-display text-lg text-[var(--book-cream)]">
-                    Glissez vos fichiers ici
+                    Ajouter à « {KIND_LABELS[kind]} »
                   </p>
                   <p className="mt-2 text-xs text-[var(--book-cream)]/50">
-                    Photos JPG/PNG/WEBP · Vidéos MP4/WEBM
+                    {kind === "video"
+                      ? "MP4 / WEBM"
+                      : "JPG / PNG / WEBP"}
                   </p>
+                  {kind === "photo" ? (
+                    <label className="mt-4 flex cursor-pointer items-center justify-center gap-2 text-xs text-[var(--book-cream)]/70">
+                      <input
+                        type="checkbox"
+                        checked={asHighlight}
+                        onChange={(e) => setAsHighlight(e.target.checked)}
+                        className="accent-[var(--book-gold)]"
+                      />
+                      Page finale PDF — Mbappé
+                    </label>
+                  ) : null}
                   <button
                     type="button"
                     disabled={busy}
@@ -247,7 +315,7 @@ export default function BookUploadPanel({
                   <input
                     ref={inputRef}
                     type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
+                    accept={accept}
                     multiple
                     className="hidden"
                     onChange={(e) => {
@@ -263,36 +331,46 @@ export default function BookUploadPanel({
 
                 <div>
                   <p className="mb-3 text-[10px] uppercase tracking-[0.25em] text-[var(--book-gold)]/70">
-                    Médias ajoutés ({items.length})
+                    {KIND_LABELS[kind]} ({managed.length})
                   </p>
-                  {items.length === 0 ? (
+                  {managed.length === 0 ? (
                     <p className="text-sm text-[var(--book-cream)]/45">
-                      Aucun média pour l’instant. Ajoutez vos photos et vidéos
-                      professionnelles.
+                      Aucun fichier dans cet onglet.
                     </p>
                   ) : (
                     <ul className="max-h-56 space-y-2 overflow-y-auto">
-                      {items.map((item) => (
+                      {managed.map((item, index) => (
                         <li
                           key={item.id}
                           className="flex items-center justify-between gap-3 border border-[var(--book-gold)]/20 px-3 py-2"
                         >
-                          <div className="min-w-0">
-                            <p className="truncate text-sm text-[var(--book-cream)]">
-                              {item.caption}
-                            </p>
-                            <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--book-gold)]/60">
-                              {item.kind === "photo" ? "Photo" : "Vidéo"}
-                            </p>
+                          <p className="text-sm text-[var(--book-cream)]">
+                            {KIND_LABELS[item.kind]} {String(index + 1).padStart(2, "0")}
+                            {item.role === "portrait" ? " · Portrait" : ""}
+                            {item.printGroup === "highlight" ? " · Mbappé" : ""}
+                          </p>
+                          <div className="flex shrink-0 items-center gap-3">
+                            {item.kind === "photo" ? (
+                              <button
+                                type="button"
+                                disabled={busy}
+                                onClick={() => void toggleHighlight(item)}
+                                className="text-[10px] uppercase tracking-[0.14em] text-[var(--book-gold)]/80 hover:text-[var(--book-gold)] disabled:opacity-50"
+                              >
+                                {item.printGroup === "highlight"
+                                  ? "Retirer fin"
+                                  : "Fin PDF"}
+                              </button>
+                            ) : null}
+                            <button
+                              type="button"
+                              disabled={busy}
+                              onClick={() => void removeItem(item.id)}
+                              className="text-[10px] uppercase tracking-[0.18em] text-red-300/80 hover:text-red-200 disabled:opacity-50"
+                            >
+                              Supprimer
+                            </button>
                           </div>
-                          <button
-                            type="button"
-                            disabled={busy}
-                            onClick={() => void removeItem(item.id)}
-                            className="shrink-0 text-[10px] uppercase tracking-[0.18em] text-red-300/80 hover:text-red-200 disabled:opacity-50"
-                          >
-                            Supprimer
-                          </button>
                         </li>
                       ))}
                     </ul>

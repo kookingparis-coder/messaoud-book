@@ -1,4 +1,14 @@
-export type MediaKind = "photo" | "video";
+export type MediaKind = "photo" | "video" | "certificate";
+
+export type MediaRole = "portrait" | "identity";
+
+/** Groupement utilisé uniquement pour le PDF imprimable */
+export type PrintGroup =
+  | "trompe"
+  | "gateaux"
+  | "exclude"
+  | "highlight"
+  | "evenementiels";
 
 export type MediaItem = {
   id: string;
@@ -11,6 +21,8 @@ export type MediaItem = {
   size: number;
   createdAt: string;
   local?: boolean;
+  role?: MediaRole;
+  printGroup?: PrintGroup;
 };
 
 export type MediaStore = {

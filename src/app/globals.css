@@ -82,6 +82,11 @@ body {
   transform-origin: top;
 }
 
+/* Print book — hidden on screen */
+.book-print {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .book-gold-foil {
     animation: none;
@@ -89,27 +94,429 @@ body {
   }
 }
 
+@page {
+  size: A4;
+  margin: 0;
+}
+
 @media print {
+  html,
+  body {
+    background: #faf7f0 !important;
+    color: #1a120c !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
   .book-no-print,
+  .book-screen,
   .book-patisserie-glow,
   .book-foil-pattern {
     display: none !important;
   }
 
-  .book-root {
-    background: #fff !important;
-    color: #111 !important;
+  .book-print {
+    display: block !important;
+    background: #faf7f0 !important;
   }
 
-  .book-gold-foil {
-    animation: none;
-    background: none;
-    -webkit-background-clip: unset;
-    background-clip: unset;
+  .book-root {
+    background: #faf7f0 !important;
+    color: #1a120c !important;
+  }
+
+  .print-page {
+    box-sizing: border-box;
+    width: 210mm;
+    height: 297mm;
+    max-height: 297mm;
+    padding: 12mm 14mm;
+    margin: 0;
+    page-break-after: always;
+    break-after: page;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    background: #faf7f0 !important;
+    color: #1a120c;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .print-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .print-frame {
+    box-sizing: border-box;
+    height: 100%;
+    min-height: 100%;
+    padding: 10mm 9mm;
+    display: flex;
+    flex-direction: column;
+    background: #faf7f0;
+    border: 1.5pt solid #c4a574;
+    overflow: hidden;
+  }
+
+  .print-eyebrow {
+    font-size: 9pt;
+    font-weight: 600;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #8a7028;
+    margin: 0 0 8pt;
+  }
+
+  .print-gold {
     color: #8a7028 !important;
   }
 
-  .book-root video {
-    display: none !important;
+  .print-rule {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, #c4a574, transparent);
+    margin: 8pt 0 14pt;
+  }
+
+  .print-rule-short {
+    width: 48mm;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .print-cover {
+    text-align: center;
+  }
+
+  .print-cover .print-frame {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .print-cover-name {
+    font-family: var(--font-display), Georgia, serif;
+    font-size: 34pt;
+    font-weight: 600;
+    line-height: 1.05;
+    margin: 0 0 10pt;
+    letter-spacing: -0.02em;
+  }
+
+  .print-cover-name span {
+    display: block;
+  }
+
+  .print-cover-title {
+    font-size: 11pt;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #6b5818;
+    margin: 0;
+  }
+
+  .print-cover-tag {
+    font-family: var(--font-display), Georgia, serif;
+    font-size: 13pt;
+    color: #3a2a18;
+    margin: 10pt 0 0;
+  }
+
+  .print-cover-portrait {
+    margin-top: 18pt;
+    width: 58mm;
+    height: 72mm;
+    border: 1px solid #c4a574;
+    overflow: hidden;
+    background: #111;
+  }
+
+  .print-cover-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .print-heading {
+    font-family: var(--font-display), Georgia, serif;
+    font-size: 22pt;
+    font-weight: 600;
+    margin: 0 0 4pt;
+    color: #1a120c;
+  }
+
+  .print-identity .print-frame {
+    justify-content: center;
+  }
+
+  .print-identity .print-eyebrow,
+  .print-identity .print-heading {
+    text-align: center;
+  }
+
+  .print-identity-grid {
+    display: grid;
+    grid-template-columns: 58mm 1fr;
+    gap: 10mm;
+    margin-top: 8mm;
+    align-items: center;
+  }
+
+  .print-identity-photo {
+    width: 58mm;
+    height: 74mm;
+    border: 1px solid #c4a574;
+    overflow: hidden;
+    background: #111;
+  }
+
+  .print-identity-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+  }
+
+  .print-identity-text p {
+    font-size: 10pt;
+    line-height: 1.45;
+    color: #3a2a18;
+    margin: 0 0 8pt;
+  }
+
+  .print-meta {
+    margin-top: 10pt;
+    padding-top: 10pt;
+    border-top: 1px solid #d4c4a0;
+    display: grid;
+    gap: 8pt;
+  }
+
+  .print-meta dt {
+    font-size: 8pt;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #8a7028;
+    margin: 0 0 2pt;
+  }
+
+  .print-meta dd {
+    margin: 0;
+    font-family: var(--font-display), Georgia, serif;
+    font-size: 11pt;
+    color: #1a120c;
+  }
+
+  .print-photos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .print-page-num {
+    font-size: 9pt;
+    color: #8a7028;
+    letter-spacing: 0.12em;
+    margin: 0;
+  }
+
+  .print-section-sub {
+    margin: 2pt 0 0;
+    font-size: 9pt;
+    color: #6b5818;
+  }
+
+  .print-photos .print-frame > .print-photo-grid {
+    flex: 1 1 auto;
+  }
+
+  .print-photo-grid {
+    flex: 1;
+    display: grid;
+    gap: 3mm;
+    min-height: 0;
+    height: 100%;
+    align-content: stretch;
+  }
+
+  .print-photo-grid-12 {
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+  }
+
+  .print-photo-grid-9 {
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+  }
+
+  .print-photo-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+  }
+
+  .print-photo-grid-3 .print-photo-cell {
+    min-height: 110mm;
+  }
+
+  .print-photo-grid-evenementiels {
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: 1fr;
+  }
+
+  .print-photo-grid-evenementiels .print-photo-cell {
+    min-height: 72mm;
+    grid-column: span 2;
+  }
+
+  .print-photo-grid-evenementiels .print-photo-cell:nth-child(4) {
+    grid-column: 2 / span 2;
+  }
+
+  .print-photo-grid-evenementiels .print-photo-cell:nth-child(5) {
+    grid-column: 4 / span 2;
+  }
+
+  .print-photo-cell {
+    margin: 0;
+    border: 1px solid #d4c4a0;
+    background: #1a120c;
+    overflow: hidden;
+    min-height: 38mm;
+  }
+
+  .print-photo-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .print-cert-intro {
+    font-size: 10pt;
+    line-height: 1.45;
+    color: #3a2a18;
+    margin: 0 0 8mm;
+    max-width: 160mm;
+  }
+
+  .print-cert-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5mm;
+    align-items: stretch;
+    min-height: 0;
+  }
+
+  .print-cert-cell {
+    margin: 0;
+    border: none;
+    background: transparent;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    min-height: 145mm;
+  }
+
+  .print-cert-cell img {
+    width: 100%;
+    height: 100%;
+    max-height: 155mm;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+  }
+
+  .print-empty {
+    margin-top: 40mm;
+    text-align: center;
+    color: #6b5818;
+    font-size: 11pt;
+  }
+
+  .print-closing .print-frame,
+  .print-closing-inner {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .print-closing-name {
+    font-family: var(--font-display), Georgia, serif;
+    font-size: 26pt;
+    font-weight: 600;
+    margin: 8pt 0 6pt;
+  }
+
+  .print-contact {
+    margin-top: 14pt;
+    font-size: 11pt;
+    color: #3a2a18;
+    line-height: 1.7;
+  }
+
+  .print-contact p {
+    margin: 0;
+  }
+
+  .print-closing-note {
+    margin: 18pt auto 0;
+    max-width: 120mm;
+    font-size: 9pt;
+    line-height: 1.5;
+    color: #6b5818;
+  }
+
+  .print-footer {
+    margin-top: 16pt;
+    font-size: 8pt;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #8a7028;
+  }
+
+  .print-highlight-intro {
+    margin: 4pt 0 8pt;
+    max-width: 160mm;
+    font-size: 11pt;
+    line-height: 1.55;
+    color: #3a2a18;
+  }
+
+  .print-highlight-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6mm;
+    min-height: 150mm;
+    align-items: stretch;
+  }
+
+  .print-highlight-grid-one {
+    grid-template-columns: 1fr;
+    max-width: 120mm;
+    margin: 0 auto;
+  }
+
+  .print-highlight-cell {
+    margin: 0;
+    overflow: hidden;
+    background: #1a1208;
+  }
+
+  .print-highlight-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 }

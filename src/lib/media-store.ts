@@ -2,7 +2,21 @@ import { randomUUID } from "crypto";
 import { promises as fs } from "fs";
 import path from "path";
 import { del } from "@vercel/blob";
-import type { MediaItem, MediaKind, MediaStore } from "@/lib/media-types";
+import type {
+  MediaItem,
+  MediaKind,
+  MediaStore,
+  PrintGroup,
+} from "@/lib/media-types";
+
+export function detectPrintGroup(
+  filename: string,
+  kind: MediaKind
+): PrintGroup | undefined {
+  if (kind !== "photo") return undefined;
+  if (/mbapp[eé]/i.test(filename)) return "highlight";
+  return "gateaux";
+}
 
 const DATA_FILE = path.join(process.cwd(), "data", "media.json");
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
@@ -38,14 +52,20 @@ export function assertAdminPin(pin: string | null | undefined): boolean {
   return Boolean(pin && pin === expected);
 }
 
-export function kindFromMime(mimeType: string): MediaKind | null {
-  if (IMAGE_TYPES.has(mimeType)) return "photo";
+export function kindFromMime(
+  mimeType: string,
+  preferred?: MediaKind
+): MediaKind | null {
   if (VIDEO_TYPES.has(mimeType)) return "video";
+  if (IMAGE_TYPES.has(mimeType)) {
+    if (preferred === "certificate") return "certificate";
+    return "photo";
+  }
   return null;
 }
 
 export function maxBytesForKind(kind: MediaKind): number {
-  return kind === "photo" ? MAX_IMAGE_BYTES : MAX_VIDEO_BYTES;
+  return kind === "video" ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
 }
 
 async function ensureDirs(): Promise<void> {
@@ -82,20 +102,32 @@ function safeExtension(filename: string, mimeType: string): string {
 
 export async function saveLocalUpload(params: {
   file: File;
-  caption?: string;
+  kind?: MediaKind;
+  printGroup?: PrintGroup;
 }): Promise<MediaItem> {
   const mimeType = params.file.type || "application/octet-stream";
-  const kind = kindFromMime(mimeType);
+  const kind = kindFromMime(mimeType, params.kind);
   if (!kind) {
     throw new Error(
       "Format non supporté. Photos : JPG, PNG, WEBP. Vidéos : MP4, WEBM."
     );
   }
+
+  if (params.kind === "video" && kind !== "video") {
+    throw new Error("Ce fichier n’est pas une vidéo.");
+  }
+  if (
+    (params.kind === "photo" || params.kind === "certificate") &&
+    kind === "video"
+  ) {
+    throw new Error("Ce fichier n’est pas une image.");
+  }
+
   if (params.file.size > maxBytesForKind(kind)) {
     throw new Error(
-      kind === "photo"
-        ? "Photo trop lourde (max 12 Mo)."
-        : "Vidéo trop lourde (max 100 Mo)."
+      kind === "video"
+        ? "Vidéo trop lourde (max 100 Mo)."
+        : "Photo trop lourde (max 12 Mo)."
     );
   }
 
@@ -113,13 +145,15 @@ export async function saveLocalUpload(params: {
     url: `/uploads/${filename}`,
     pathname: filename,
     filename: params.file.name,
-    caption:
-      params.caption?.trim() ||
-      params.file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "),
+    caption: "",
     mimeType,
     size: params.file.size,
     createdAt: new Date().toISOString(),
     local: true,
+    printGroup:
+      kind === "photo"
+        ? params.printGroup || detectPrintGroup(params.file.name, kind)
+        : undefined,
   };
 
   const store = await readMedia();
@@ -134,9 +168,10 @@ export async function registerRemoteUpload(params: {
   filename: string;
   mimeType: string;
   size: number;
-  caption?: string;
+  kind?: MediaKind;
+  printGroup?: PrintGroup;
 }): Promise<MediaItem> {
-  const kind = kindFromMime(params.mimeType);
+  const kind = kindFromMime(params.mimeType, params.kind);
   if (!kind) throw new Error("Format non supporté.");
 
   const item: MediaItem = {
@@ -145,19 +180,33 @@ export async function registerRemoteUpload(params: {
     url: params.url,
     pathname: params.pathname,
     filename: params.filename,
-    caption:
-      params.caption?.trim() ||
-      params.filename.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " "),
+    caption: "",
     mimeType: params.mimeType,
     size: params.size,
     createdAt: new Date().toISOString(),
     local: false,
+    printGroup:
+      kind === "photo"
+        ? params.printGroup || detectPrintGroup(params.filename, kind)
+        : undefined,
   };
 
   const store = await readMedia();
   store.items = [item, ...store.items];
   await writeMedia(store);
   return item;
+}
+
+export async function updateMediaPrintGroup(
+  id: string,
+  printGroup: PrintGroup
+): Promise<MediaItem | null> {
+  const store = await readMedia();
+  const index = store.items.findIndex((entry) => entry.id === id);
+  if (index < 0) return null;
+  store.items[index] = { ...store.items[index], printGroup };
+  await writeMedia(store);
+  return store.items[index];
 }
 
 export async function deleteMedia(id: string): Promise<boolean> {

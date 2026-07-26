@@ -15,9 +15,9 @@ const sans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Messaoud Ben Soltane — Book professionnel | Pâtissier artisan",
+  title: "Messaoud Ben Soltan — Book professionnel | Pâtissier artisan",
   description:
-    "Book photos et vidéos professionnel de Messaoud Ben Soltane, pâtissier artisan.",
+    "Book photos et vidéos professionnel de Messaoud Ben Soltan, pâtissier artisan.",
   robots: { index: false, follow: false },
 };
 
