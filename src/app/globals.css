@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --book-gold: #d4af37;
+  --book-gold-bright: #f0d78c;
+  --book-gold-soft: #c9a84c;
+  --book-gold-dim: #8a7028;
+  --book-cream: #f7efd8;
+  --book-noir: #070707;
+}
+
+body {
+  background: #000;
+  color: var(--book-cream);
+}
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+.font-sans {
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.book-patisserie-glow {
+  background:
+    radial-gradient(ellipse 50% 40% at 15% 10%, rgb(212 175 55 / 0.12), transparent 55%),
+    radial-gradient(ellipse 45% 35% at 85% 55%, rgb(240 215 140 / 0.06), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgb(212 175 55 / 0.08), transparent 55%);
+}
+
+.book-foil-pattern {
+  opacity: 0.035;
+  background-image:
+    linear-gradient(135deg, #d4af37 1px, transparent 1px),
+    linear-gradient(45deg, #d4af37 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black, transparent);
+}
+
+.book-gold-foil {
+  background-image: linear-gradient(
+    115deg,
+    #8a7028 0%,
+    #d4af37 22%,
+    #f0d78c 38%,
+    #d4af37 55%,
+    #c9a84c 72%,
+    #f0d78c 88%,
+    #b8922a 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: book-foil-shine 8s ease-in-out infinite;
+}
+
+@keyframes book-foil-shine {
+  0%,
+  100% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+}
+
+@keyframes scroll-line {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(200%);
+  }
+}
+
+.book-scroll-line {
+  animation: scroll-line 1.8s ease-in-out infinite;
+  transform-origin: top;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .book-gold-foil {
+    animation: none;
+    background-position: 40% center;
+  }
+}
+
+@media print {
+  .book-no-print,
+  .book-patisserie-glow,
+  .book-foil-pattern {
+    display: none !important;
+  }
+
+  .book-root {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  .book-gold-foil {
+    animation: none;
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    color: #8a7028 !important;
+  }
+
+  .book-root video {
+    display: none !important;
+  }
+}
