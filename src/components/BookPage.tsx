@@ -3,8 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import BookPrint from "@/components/BookPrint";
-import BookUploadPanel from "@/components/BookUploadPanel";
-import type { MediaItem, MediaKind } from "@/lib/media-types";
+import type { MediaItem } from "@/lib/media-types";
 import { profile } from "@/lib/profile";
 
 type Tab = "photo" | "video" | "certificate";
@@ -44,8 +43,6 @@ export default function BookPage() {
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [visible, setVisible] = useState(false);
   const [uploads, setUploads] = useState<MediaItem[]>([]);
-  const [blobEnabled, setBlobEnabled] = useState(false);
-  const [pinRequired, setPinRequired] = useState(false);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => setVisible(true));
@@ -60,8 +57,6 @@ export default function BookPage() {
         const data = await res.json();
         if (cancelled) return;
         setUploads(data.items || []);
-        setBlobEnabled(Boolean(data.blobEnabled));
-        setPinRequired(Boolean(data.pinRequired));
       } catch {
         // empty book
       }
@@ -539,14 +534,6 @@ export default function BookPage() {
       </footer>
       </div>
 
-      <BookUploadPanel
-        items={uploads}
-        blobEnabled={blobEnabled}
-        pinRequired={pinRequired}
-        onChange={setUploads}
-        defaultKind={tab as MediaKind}
-      />
-
       {lightbox !== null && gallery[lightbox] && (
         <div
           className="book-no-print fixed inset-0 z-50 flex items-center justify-center bg-black/97 p-4"
@@ -589,9 +576,6 @@ function EmptyState({ label }: { label: string }) {
   return (
     <div className="mx-auto max-w-xl border border-dashed border-[var(--book-gold)]/30 px-6 py-16 text-center">
       <p className="text-sm text-[var(--book-cream)]/50">{label}</p>
-      <p className="mt-3 text-xs text-[var(--book-gold)]/50">
-        Utilisez « Ajouter des médias » pour compléter cet onglet.
-      </p>
     </div>
   );
 }

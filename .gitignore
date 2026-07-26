@@ -42,3 +42,5 @@ next-env.d.ts
 
 # Keep portfolio media in git so the public site ships with photos/videos.
 # Local-only overrides can still be ignored if needed later.
+
+.vercel

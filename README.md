@@ -2,6 +2,8 @@
 
 Book photos & vidéos pour pâtissier artisan (noir & or).
 
+Site public : https://messaoud-book.vercel.app
+
 ## Démarrage
 
 ```bash
@@ -11,10 +13,4 @@ npm run dev
 
 Ouvrir [http://localhost:3000](http://localhost:3000).
 
-## Upload
-
-Bouton **+ Ajouter photos / vidéos** en bas à droite.
-
-- En local : fichiers dans `public/uploads/`
-- Sur Vercel : configurer `BLOB_READ_WRITE_TOKEN`
-- Optionnel : `BOOK_ADMIN_PIN` pour protéger l’upload
+Les médias sont figés dans `public/uploads/` et `data/media.json` (pas d’upload public).
