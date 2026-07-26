@@ -201,6 +201,14 @@ body {
     align-items: center;
   }
 
+  .print-cover-logo {
+    width: 38mm;
+    height: 38mm;
+    object-fit: contain;
+    margin: 0 auto 8pt;
+    display: block;
+  }
+
   .print-cover-name {
     font-family: var(--font-display), Georgia, serif;
     font-size: 34pt;

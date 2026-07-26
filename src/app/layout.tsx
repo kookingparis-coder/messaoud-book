@@ -18,6 +18,10 @@ export const metadata: Metadata = {
   title: "Messaoud Ben Soltan — Book professionnel | Pâtissier artisan",
   description:
     "Book photos et vidéos professionnel de Messaoud Ben Soltan, pâtissier artisan.",
+  icons: {
+    icon: "/logo-mbs.png",
+    apple: "/logo-mbs.png",
+  },
   robots: { index: false, follow: false },
 };
 

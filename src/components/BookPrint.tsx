@@ -93,6 +93,12 @@ export default function BookPrint({
         <div className="print-frame">
           <p className="print-eyebrow">Book professionnel</p>
           <div className="print-rule" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo-mbs.png"
+            alt=""
+            className="print-cover-logo"
+          />
           <h1 className="print-cover-name">
             <span>{profile.firstName}</span>
             <span className="print-gold">{profile.lastName}</span>

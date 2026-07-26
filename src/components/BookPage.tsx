@@ -207,10 +207,15 @@ export default function BookPage() {
       <div className="book-patisserie-glow pointer-events-none fixed inset-0" aria-hidden />
       <div className="book-foil-pattern pointer-events-none fixed inset-0" aria-hidden />
 
-      <header className="relative z-20 flex items-center justify-between border-b border-[var(--book-gold)]/25 px-5 py-5 sm:px-8 lg:px-12">
-        <p className="text-[10px] font-medium uppercase tracking-[0.4em] text-[var(--book-gold)]">
-          Book professionnel
-        </p>
+      <header className="relative z-20 flex items-center justify-between border-b border-[var(--book-gold)]/25 px-5 py-4 sm:px-8 lg:px-12">
+        <Image
+          src="/logo-mbs.png"
+          alt={profile.fullName}
+          width={56}
+          height={56}
+          className="h-12 w-12 object-contain sm:h-14 sm:w-14"
+          priority
+        />
         <button
           type="button"
           onClick={handlePrint}
@@ -247,18 +252,22 @@ export default function BookPage() {
             visible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
           }`}
         >
-          <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.42em] text-[var(--book-gold)]">
+          <Image
+            src="/logo-mbs.png"
+            alt={profile.fullName}
+            width={280}
+            height={280}
+            className="h-auto w-[min(52vw,220px)] object-contain drop-shadow-[0_8px_40px_rgba(0,0,0,0.55)] sm:w-[240px] lg:w-[280px]"
+            priority
+          />
+
+          <h1 className="sr-only">{profile.fullName}</h1>
+
+          <p className="mt-7 text-[11px] font-semibold uppercase tracking-[0.42em] text-[var(--book-gold)]">
             {profile.title}
           </p>
 
-          <h1 className="font-display text-[clamp(2.75rem,8vw,6.5rem)] font-semibold leading-[0.95] tracking-tight">
-            <span className="block text-[var(--book-cream)]">
-              {profile.firstName}
-            </span>
-            <span className="book-gold-foil mt-1 block">{profile.lastName}</span>
-          </h1>
-
-          <GoldRule className="mt-8 max-w-xs" />
+          <GoldRule className="mt-6 max-w-xs" />
 
           <p className="mt-6 max-w-md font-display text-lg leading-relaxed text-[var(--book-cream)]/85 sm:text-xl">
             {profile.tagline}
@@ -494,10 +503,17 @@ export default function BookPage() {
         <div className="relative mx-auto max-w-3xl px-5 py-20 text-center sm:px-8 lg:py-28">
           <GoldCorners className="opacity-60" />
           <div className="relative px-4 py-10 sm:px-10 sm:py-14">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-[var(--book-gold)]">
+            <Image
+              src="/logo-mbs.png"
+              alt=""
+              width={120}
+              height={120}
+              className="mx-auto h-24 w-24 object-contain sm:h-28 sm:w-28"
+            />
+            <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.35em] text-[var(--book-gold)]">
               Coordonnées professionnelles
             </p>
-            <h2 className="book-gold-foil mt-6 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h2 className="book-gold-foil mt-4 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
               {profile.fullName}
             </h2>
             <p className="mt-3 text-sm uppercase tracking-[0.28em] text-[var(--book-gold-soft)]">
