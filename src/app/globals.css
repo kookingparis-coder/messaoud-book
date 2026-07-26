@@ -207,6 +207,7 @@ body {
     object-fit: contain;
     margin: 0 auto 8pt;
     display: block;
+    border-radius: 50%;
   }
 
   .print-cover-name {

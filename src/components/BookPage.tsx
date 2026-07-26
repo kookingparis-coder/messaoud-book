@@ -213,7 +213,7 @@ export default function BookPage() {
           alt={profile.fullName}
           width={56}
           height={56}
-          className="h-12 w-12 object-contain sm:h-14 sm:w-14"
+          className="h-12 w-12 rounded-full object-contain sm:h-14 sm:w-14"
           priority
         />
         <button
@@ -257,7 +257,7 @@ export default function BookPage() {
             alt={profile.fullName}
             width={280}
             height={280}
-            className="h-auto w-[min(52vw,220px)] object-contain drop-shadow-[0_8px_40px_rgba(0,0,0,0.55)] sm:w-[240px] lg:w-[280px]"
+            className="h-auto w-[min(52vw,220px)] rounded-full object-contain drop-shadow-[0_8px_40px_rgba(0,0,0,0.55)] sm:w-[240px] lg:w-[280px]"
             priority
           />
 
@@ -508,7 +508,7 @@ export default function BookPage() {
               alt=""
               width={120}
               height={120}
-              className="mx-auto h-24 w-24 object-contain sm:h-28 sm:w-28"
+              className="mx-auto h-24 w-24 rounded-full object-contain sm:h-28 sm:w-28"
             />
             <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.35em] text-[var(--book-gold)]">
               Coordonnées professionnelles
